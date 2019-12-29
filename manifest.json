@@ -1,5 +1,5 @@
 {
-  "name":"話速度計",
+  "name":"簡易話速度計",
   "short_name":"話速度計",
   "icons": [{
       "src": "https://qurihara.github.io/speechrate/icon/android/drawable-xxxhdpi/ic_launcher.png",

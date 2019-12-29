@@ -1,0 +1,713 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <title>話速度計</title>
+
+
+  <!-- PWA for iOS -->
+  <!-- アドレスバー等のブラウザのUIを非表示 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- default（Safariと同じ） / black（黒） / black-translucent（ステータスバーをコンテンツに含める） -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <!-- ホーム画面に表示されるアプリ名 -->
+  <meta name="apple-mobile-web-app-title" content="話速度計">
+  <!-- ホーム画面に表示されるアプリアイコン -->
+  <link rel="apple-touch-icon" href="https://qurihara.github.io/speechrate/icon/ios/appicon-76@2x.png">
+
+
+  <!-- PWA for android -->
+  <!-- ウェブアプリマニフェストの読み込み -->
+  <link rel="manifest" href="https://qurihara.github.io/speechrate/manifest.json">
+  <!-- ServiceWorkerの登録 -->
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('https://qurihara.github.io/speechrate/sw.js')
+      .then((reg) => {
+        console.log('Service worker registered.', reg);
+      });
+  }
+  </script>
+  </head>
+  <body id="all">
+    <article id="article">
+      <h1 id="title" class="text-center h2">SpeechRate Meter<br></h1>
+      <br>
+      <div class="container">
+        <div class="row">
+            <div class="col-3">
+            </div>
+            <div class="col-6">
+              <div class="d-flex justify-content-center">
+                <div class="btn-toolbar">
+                  <div class="btn-group">
+                    <button id="start-button1" class="btn btn-primary mb-2">Start</button>
+                    <button id="clear-button" class="btn btn-primary mb-2">Stop</button>
+                    <a class="btn btn-primary mb-2" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                      Option
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex justify-content-center">
+                <canvas id="canvas" width="300" height="50"></canvas>
+              </div>
+              <div class="container-b">
+                <div class="output">
+               <div class="d-flex justify-content-center">
+                      <span class="display-5">Average</span>
+               </div>
+               <div class="d-flex justify-content-center">
+                 <span class="display-4">
+                      <div id="console2">0.0</div>
+                 </span>
+               </div>
+               <div class="d-flex justify-content-center">
+                      <span class="display-5">mora/s</span>
+               </div>
+<!--
+                  <div class="d-flex justify-content-center">
+                    <ul id="console2" class="list-unstyled">
+                      <li></li>
+                    </ul>
+                    <span id="console" class="display-4">
+                    </span>
+                  </div>
+-->
+                  <div class="d-flex justify-content-center">
+                    <div id="warning"></div>
+                  </div>
+                </div>
+              </div>
+       <!--       <canvas id="myChart"></canvas>            -->
+            </div>
+            <div class="col-3">
+            </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="row">
+            <div class="col-1">
+            </div>
+            <div class="col-10">
+              <canvas id="myChart"></canvas>
+            </div>
+            <div class="col-1">
+            </div>
+        </div>
+      </div>
+      <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+
+              <div class="d-flex justify-content-center">
+                <h3 class="text-center h3">Limit: </h3><h3 id="val" class="text-center h3">9.5</h3>
+<!--              <div class="d-flex justify-content-center">
+              <span id="val" class="display-5">1.8</span>
+              </div>-->
+              </div>
+              <div class="container">
+                <div class="row">
+                    <div class="col-4">
+                    </div>
+                    <div class="col-4">
+                      <div class="d-flex justify-content-center">
+                        <input type="range" class="form-control-range" name="num" min="1" max="20" step="0.5" value="9.5" onchange="changeValue(this.value)">
+                      </div><br>
+                    </div>
+                    <div class="col-4">
+                    </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-center">
+                <form class="form-inline">
+        <!--          <label class="my-1 mr-2" for="soundurl">Sound</label> -->
+                  <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-primary active mb-2">
+                      <input type="radio" name="sound" id="mute" autocomplete="off" checked>Mute
+                    </label>
+                    <label class="btn btn-primary mb-2">
+                      <input type="radio" name="sound" id="soundenabled" autocomplete="off">Beep
+                    </label>
+                  </div>
+                </form>
+              </div>
+              <div class="d-flex justify-content-center">
+                <form class="form-inline">
+                  <label class="my-1 mr-2" for="webhookurl">Webhook</label>
+                  <input type="text" class="form-control mb-2 mr-sm-2" id="webhookurl" placeholder="Webhook URL on alert">
+                  <button type="button" class="btn btn-primary mb-2" id="webhookbutton">Apply</button>
+                </form>
+              </div>
+              <div class="d-flex justify-content-center">
+                <div class="btn-toolbar">
+                  <div class="btn-group">
+                    <button id="start-buttonTest" class="btn btn-primary mb-2">Test</button>
+                  </div>
+                </div>
+              </div>
+             <div class="d-flex justify-content-center">
+                    <span class="display-5">Now</span>
+             </div>
+             <div class="d-flex justify-content-center">
+               <span class="display-4">
+                    <div id="console">0.0</div>
+               </span>
+             </div>
+             <div class="d-flex justify-content-center">
+                    <span class="display-5">mora/s</span>
+             </div>
+
+        </div>
+      </div>
+    </article>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>    <script src="https://obniz.io/js/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/min/moment.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@1.8.0"></script>
+<!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/eruda/1.4.3/eruda.min.js"></script>
+-->
+<script>
+
+function changeValue(value) {
+  document.getElementById("val").innerHTML = value;
+  fireCount = value;
+}
+
+//eruda.init();
+
+// sound effect from https://maoudamashii.jokersounds.com/list/se2.html
+//var sound;
+var sound = new Audio("https://qurihara.github.io/speechrate/sound/se_maoudamashii_onepoint13.mp3");
+//var sound; //= new Audio("https://rawgit.com/Fulox/FullScreenMario-JSON/master/Sounds/Sounds/mp3/Coin.mp3");
+var modelLoaded = false;
+
+// 変数定義
+var localMediaStream = null;
+var localScriptProcessor = null;
+var audioContext;// = new AudioContext();
+var audioData = []; // 録音データ
+var buf;
+var buf_cb;
+
+let model;
+var modelname = '';
+var bufferSize = 1024;
+var fft_frames = bufferSize;
+var fftSize = bufferSize/2;
+var predictCount = 20;
+var divOffset = 100;
+
+let model_cb;
+var modelname_cb = '';
+var bufferSize_cb = 1024;
+var fft_frames_cb = bufferSize_cb;
+var fftSize_cb = bufferSize_cb/2;
+var predictCount_cb = 20;
+var divOffset_cb = 100;
+
+
+
+var fireCount = 9.5;
+var sr = 0;
+var wfurl = "";
+var alerting = false;
+
+// キャンバス
+var canvas = document.getElementById('canvas');
+var canvasContext = canvas.getContext('2d');
+
+// 音声解析
+var audioAnalyser = null;
+//-----------------------
+// start button event
+//-----------------------
+
+$("#clear-button").click(function clear() {
+   location.reload();
+});
+
+
+$("#start-button1").click(function(){
+// 	modelname = 'https://qurihara.github.io/crosstalk-breaker/191218_sr_s/model-reg/';
+	modelname = 'https://qurihara.github.io/speechrate/models/191222_60/model-reg/';
+	modelname_cb = 'https://qurihara.github.io/speechrate/models/191212_hard/model-class/';
+	loadModel(tf.loadLayersModel);
+
+    bufferSize = 1024;
+    fftSize = bufferSize/8;//4;
+    predictCount = 60;
+    divOffset = 125.55546;
+
+    bufferSize_cb = 1024;
+    fftSize_cb = bufferSize_cb/4;
+    predictCount_bc = 20;
+    divOffset_cb = 120;
+
+  	var ctx = document.getElementById('myChart').getContext('2d');
+	window.myChart = new Chart(ctx, config);
+
+});
+
+$("#start-buttonTest").click(function(){
+  onfire();
+});
+
+
+
+//-----------------------
+// load model
+//-----------------------
+
+async function loadModel(loadf) {
+    let modelfile = modelname + 'model.json';
+	console.log("model loading.. : " + modelfile);
+	$("#warning").html(`model loading...`);
+	model=await loadf(modelfile);
+
+    let modelfile_cb = modelname_cb + 'model.json';
+	console.log("model loading.. : " + modelfile_cb);
+	model_cb=await loadf(modelfile_cb);
+
+
+    console.log("model loaded.");
+	$("#warning").html(modelname + ' loaded.');
+    modelLoaded = true;
+
+    init_tfjs();
+};
+
+
+function init_tfjs(){
+  buf = tf.buffer([fftSize,predictCount]);
+  buf_cb = tf.buffer([fftSize_cb,predictCount_cb]);
+
+  //hot start
+  const mat = buf.toTensor().expandDims().expandDims(-1);
+  predict(mat);
+  mat.dispose();
+  const mat_cb = buf_cb.toTensor().expandDims().expandDims(-1);
+  predict_cb(mat_cb);
+  mat_cb.dispose();
+
+  startWebcam();
+}
+
+var qCount = 10;
+var que = [];//0,0,0,0,0];
+enqueue = function(n){
+  que.push(n);
+  if (que.length > qCount){
+    que.shift();
+  }
+}
+average = function(){
+  if (que.length == 0) return 0.0;
+  let a = 0.0;
+  for(var i=0;i<que.length;i++){
+    a = a + que[i];
+  }
+  a = a / que.length;
+  return a;
+}
+
+
+var qCount_cb = 3;
+var que_cb = [];//0,0,0,0,0];
+enqueue_cb = function(n){
+  que_cb.push(n);
+  if (que_cb.length > qCount_cb){
+    que_cb.shift();
+  }
+}
+average_cb = function(){
+  if (que_cb.length == 0) return 0.0;
+  let a = 0.0;
+  for(var i=0;i<que_cb.length;i++){
+    a = a + que_cb[i];
+  }
+  a = a / que_cb.length;
+  return a;
+}
+
+//-----------------------
+// TensorFlow.js method
+// predict tensor
+//-----------------------
+
+async function predict(tensor){
+  let cb = average_cb()
+//   console.log(cb);
+  sr = 0.0;
+  if (cb <1){
+    //do nothing
+  }else{
+    let prediction = await model.predict(tensor).data();
+    sr = prediction[0];
+  }
+  enqueue(sr);
+  $("#console").empty();
+  $("#console2").empty();
+  $("#console").append(`${Math.round(sr*10)/10}`);
+  $("#console2").append(`${Math.round(average()*10)/10}`);
+  if (average() >= fireCount){
+    onfire();
+  }
+  if (cb > 1){
+    console.log("noisy");
+  }
+};
+
+onfire = function(){
+    if (alerting == true) {
+      console.log("still alerting");
+      return;
+    }
+    alerting = true;
+    $("#all").css('background-color','red');
+    if (wfurl != ''){
+      $.get(wfurl);
+//       console.log("webhook");
+    }
+
+    let mute = $("#mute").prop("checked");
+    if (mute == false){
+      if (sound){
+        sound.play();
+      }
+    }
+
+    setTimeout(function(){
+      $("#all").css('background-color','white');
+      alerting = false;
+    },1000);
+}
+
+async function predict_cb(tensor){
+  let prediction = await model_cb.predict(tensor).data();
+  let results = Array.from(prediction)
+              .map(function(p,i){
+  return {
+      probability: p,
+      expectation: p*i,
+      num: i
+  };
+  }).sort(function(a,b){
+      return b.probability-a.probability;
+  });
+  cb = results[0].num;
+  enqueue_cb(cb);
+//   console.log(cb);
+};
+
+
+var counter = 0;
+var counter_cb = 0;
+var get_fft = function(dat){
+  const fft_cb = tf.tidy(() => {
+      let offset = tf.scalar(divOffset_cb);
+      let fft = tf.signal.stft(tf.tensor1d(dat),fft_frames_cb,bufferSize_cb).abs().div(offset).flatten().slice(0,fftSize_cb);
+      //    console.log(fft.shape);
+      return fft.dataSync();
+  });
+  for (var i=0;i<fftSize_cb;i++) buf_cb.set(fft_cb[i],i,counter_cb);
+  counter_cb++;
+  if (counter_cb == predictCount_cb) {
+    const mat_cb = buf_cb.toTensor().expandDims().expandDims(-1);
+    predict_cb(mat_cb);
+    mat_cb.dispose();
+  }
+  if (counter_cb == predictCount_cb) counter_cb = 0;
+
+  const fft = tf.tidy(() => {
+      let offset = tf.scalar(divOffset);
+      let fft = tf.signal.stft(tf.tensor1d(dat),fft_frames,bufferSize).abs().div(offset).flatten().slice(0,fftSize);
+      //    console.log(fft.shape);
+      return fft.dataSync();
+  });
+  for (var i=0;i<fftSize;i++) buf.set(fft[i],i,counter);
+  counter++;
+  if (counter == predictCount) {
+    const mat = buf.toTensor().expandDims().expandDims(-1);
+    predict(mat);
+    mat.dispose();
+  }
+  if (counter == predictCount) counter = 0;
+
+}
+
+
+//-----------------------
+// start webcam
+//-----------------------
+
+var audio = {};
+// var acontext;// = new AudioContext();
+var mediaStream;
+function startWebcam() {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();//new AudioContext();
+    recordingFlg = true;
+	console.log("mic start.");
+// 	$("#console2").html(`mic start.`);
+  	$("#warning").empty();
+
+// 	// Older browsers might not implement mediaDevices at all, so we set an empty object first
+// 	if (navigator.mediaDevices === undefined) {
+// 		navigator.mediaDevices = {};
+// 	}
+
+// 	// Some browsers partially implement mediaDevices. We can't just assign an object
+// 	// with getUserMedia as it would overwrite existing properties.
+// 	// Here, we will just add the getUserMedia property if it's missing.
+// 	if (navigator.mediaDevices.getUserMedia === undefined) {
+// 		navigator.mediaDevices.getUserMedia = function(constraints) {
+
+// 			// First get ahold of the legacy getUserMedia, if present
+// 			var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+// 			// Some browsers just don't implement it - return a rejected promise with an error
+// 			// to keep a consistent interface
+// 			if (!getUserMedia) {
+// 				return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+// 			}
+
+// 			// Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+// 			return new Promise(function(resolve, reject) {
+// 				getUserMedia.call(navigator, constraints, resolve, reject);
+// 			});
+// 		}
+// 	}
+
+    navigator.mediaDevices = navigator.mediaDevices || ((navigator.mozGetUserMedia || navigator.webkitGetUserMedia) ? {
+     getUserMedia: function(c) {
+       return new Promise(function(y, n) {
+         (navigator.mozGetUserMedia ||
+          navigator.webkitGetUserMedia).call(navigator, c, y, n);
+         });
+       }
+      } : null);
+
+    if (!navigator.mediaDevices) {
+      alert("getUserMedia() not supported.");
+      console.log("getUserMedia() not supported.");
+      return;
+    }
+
+	navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+	.then(function(stream) {
+        // 録音関連
+        localMediaStream = stream;
+        var scriptProcessor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+        localScriptProcessor = scriptProcessor;
+        var mediastreamsource = audioContext.createMediaStreamSource(stream);
+        mediastreamsource.connect(scriptProcessor);
+        scriptProcessor.onaudioprocess = onAudioProcess;
+        scriptProcessor.connect(audioContext.destination);
+
+        // 音声解析関連
+        audioAnalyser = audioContext.createAnalyser();
+        audioAnalyser.fftSize = 2048;
+        frequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
+        timeDomainData = new Uint8Array(audioAnalyser.frequencyBinCount);
+        mediastreamsource.connect(audioAnalyser);
+
+    })
+	.catch(function(err) {
+		console.log(err.name + ": " + err.message);
+	});
+
+}
+
+var onAudioProcess = function(e) {
+    if (!recordingFlg) return;
+
+    var input = e.inputBuffer.getChannelData(0);
+//     console.log("samplerate : " + e.inputBuffer.sampleRate + " ,length : " + e.inputBuffer.length + " ,duration : " + e.inputBuffer.duration);
+    var bufferData = new Float32Array(bufferSize);
+    for (var i = 0; i < bufferSize; i++) {
+        bufferData[i] = input[i];
+    }
+
+    if (modelLoaded == true){
+      get_fft(bufferData);
+    }
+
+    waCounter++;
+    if(waCounter % waCountFrq == 0){
+      // 波形を解析
+      analyseVoice();
+      waCounter=0;
+    }
+};
+var waCounter = 0;
+var waCountFrq = 3;
+
+// 解析用処理
+var analyseVoice = function() {
+    var fsDivN = audioContext.sampleRate /2 / audioAnalyser.fftSize;
+    var spectrums = new Uint8Array(audioAnalyser.frequencyBinCount);
+    audioAnalyser.getByteFrequencyData(spectrums);
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+
+    canvasContext.beginPath();
+
+    for (var i = 0, len = spectrums.length; i < len; i++) {
+        //canvasにおさまるように線を描画
+        var x = (i / len) * canvas.width;
+        var y = (1 - (spectrums[i] / 255)) * canvas.height;
+        if (i === 0) {
+            canvasContext.moveTo(x, y);
+        } else {
+            canvasContext.lineTo(x, y);
+        }
+//         var f = Math.floor(i * fsDivN);  // index -> frequency;
+//         // 500 Hz単位にy軸の線とラベル出力
+//         if ((f % 500) === 0) {
+//             var text = (f < 1000) ? (f + ' Hz') : ((f / 1000) + ' kHz');
+//             // Draw grid (X)
+//             canvasContext.fillRect(x, 0, 1, canvas.height);
+//             // Draw text (X)
+//             canvasContext.fillText(text, x, canvas.height);
+//         }
+    }
+
+    canvasContext.stroke();
+
+//     // x軸の線とラベル出力
+//     var textYs = ['1.00', '0.50', '0.00'];
+//     for (var i = 0, len = textYs.length; i < len; i++) {
+//         var text = textYs[i];
+//         var gy   = (1 - parseFloat(text)) * canvas.height;
+//         // Draw grid (Y)
+//         canvasContext.fillRect(0, gy, canvas.width, 1);
+//         // Draw text (Y)
+//         canvasContext.fillText(text, 0, gy);
+//     }
+}
+
+
+//chart
+var chartColors = {
+	red: 'rgb(255, 99, 132)',
+	orange: 'rgb(255, 159, 64)',
+	yellow: 'rgb(255, 205, 86)',
+	green: 'rgb(75, 192, 192)',
+	blue: 'rgb(54, 162, 235)',
+	purple: 'rgb(153, 102, 255)',
+	grey: 'rgb(201, 203, 207)'
+};
+
+function onRefresh(chart) {
+  chart.config.data.datasets[0].data.push({
+			x: Date.now(),
+			y: sr
+  });
+  chart.config.data.datasets[1].data.push({
+			x: Date.now(),
+			y: average()
+  });
+  chart.config.data.datasets[2].data.push({
+			x: Date.now(),
+			y: fireCount
+  });
+}
+
+var color = Chart.helpers.color;
+var config = {
+	type: 'line',
+	data: {
+		datasets: [{
+			label: 'Now',
+			backgroundColor: color(chartColors.blue).alpha(0.5).rgbString(),
+			borderColor: chartColors.blue,
+			fill: false,
+			borderDash: [8, 4],
+			cubicInterpolationMode: 'monotone',
+			data: []
+		}, {
+			label: 'Ave.',
+			backgroundColor: color(chartColors.green).alpha(0.5).rgbString(),
+			borderColor: chartColors.green,
+			fill: false,
+			cubicInterpolationMode: 'monotone',
+			data: []
+		}, {
+			label: 'Limit',
+			backgroundColor: color(chartColors.red).alpha(0.5).rgbString(),
+			borderColor: chartColors.red,
+			fill: false,
+			lineTension: 0,
+			data: []
+		}]
+    },
+	options: {
+// 		title: {
+// 			display: true,
+// 			text: 'Speech rate'
+// 		},
+		scales: {
+			xAxes: [{
+				type: 'realtime',
+				realtime: {
+					duration: 20000,
+					refresh: 1000,
+					delay: 1000,
+					onRefresh: onRefresh
+				}
+			}],
+			yAxes: [{
+				scaleLabel: {
+					display: true,
+					labelString: 'moras/sec'
+				}
+			}]
+		},
+		tooltips: {
+			mode: 'nearest',
+			intersect: false
+		},
+		hover: {
+			mode: 'nearest',
+			intersect: false
+		}
+	}
+};
+
+  //
+
+window.onload = function() {
+  var cookie = $.cookie('webhookurl');
+  if(cookie){
+    console.log(cookie);
+    $('#webhookurl').val(cookie);
+  }else{
+//     console.log("no cookie");
+  }
+
+}
+$("#webhookbutton").click(function(){
+  wfurl = $('#webhookurl').val()
+  console.log(wfurl);
+  if (wfurl != ''){
+    $.cookie('webhookurl',wfurl);
+  }else{
+    console.log("no url");
+  }
+  $('#webhookurl').prop('disabled', true);
+  $('#webhookbutton').prop('disabled', true);
+});
+
+
+
+</script>
+  </body>
+</html>

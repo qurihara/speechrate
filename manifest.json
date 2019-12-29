@@ -1,0 +1,17 @@
+{
+  "name":"話速度計",
+  "short_name":"話速度計",
+  "icons": [{
+      "src": "https://qurihara.github.io/speechrate/icon/android/drawable-xxxhdpi/ic_launcher.png",
+      "sizes":"192x192",
+      "type": "image/png"
+    }, {
+      "src": "https://qurihara.github.io/speechrate/icon/android/playstore-icon.png",
+      "sizes":"512x512",
+      "type": "image/png"
+    }],
+  "start_url": "https://qurihara.github.io/speechrate/index.html?utm_source=homescreen",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF"
+}

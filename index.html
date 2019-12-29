@@ -56,7 +56,7 @@
               <div class="container-b">
                 <div class="output">
                <div class="d-flex justify-content-center">
-                      <span class="display-5">平均</span>
+                      <span class="display-5">平均話速度</span>
                </div>
                <div class="d-flex justify-content-center">
                  <span class="display-4">
@@ -128,7 +128,7 @@
                       <input type="radio" name="sound" id="mute" autocomplete="off" checked>無音
                     </label>
                     <label class="btn btn-primary mb-2">
-                      <input type="radio" name="sound" id="soundenabled" autocomplete="off">警告音
+                      <input type="radio" name="sound" id="soundenabled" autocomplete="off">警告音あり
                     </label>
                   </div>
                 </form>
@@ -148,7 +148,7 @@
                 </div>
               </div>
              <div class="d-flex justify-content-center">
-                    <span class="display-5">現在値</span>
+                    <span class="display-5">瞬間話速度</span>
              </div>
              <div class="d-flex justify-content-center">
                <span class="display-4">
@@ -626,7 +626,7 @@ var config = {
 	type: 'line',
 	data: {
 		datasets: [{
-			label: '現在',
+			label: '瞬間値',
 			backgroundColor: color(chartColors.blue).alpha(0.5).rgbString(),
 			borderColor: chartColors.blue,
 			fill: false,
@@ -634,7 +634,7 @@ var config = {
 			cubicInterpolationMode: 'monotone',
 			data: []
 		}, {
-			label: '平均',
+			label: '平均値',
 			backgroundColor: color(chartColors.green).alpha(0.5).rgbString(),
 			borderColor: chartColors.green,
 			fill: false,

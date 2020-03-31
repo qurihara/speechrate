@@ -3,5 +3,9 @@
 
 実装にはtensorflow.jsを用いました。
 
+* iPhoneとiPadならSafariで動きます。
+* AndroidスマホならChrome, Firefoxで動きます。
+* PCならChrome,Firefox, Safariで動きます。
+
 Demo [https://qurihara.github.io/speechrate/]
 
